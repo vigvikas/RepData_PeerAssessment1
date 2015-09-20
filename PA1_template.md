@@ -8,7 +8,8 @@ output:
 
 ## Loading and preprocessing the data
 
-```{r warning = FALSE, message = FALSE}
+
+```r
 # Load required pacakages
 library(downloader)
 library(dplyr)
@@ -16,7 +17,8 @@ library(ggplot2)
 ```
 
 
-```{r}
+
+```r
 # checks for existence of the zip file in the working directory; if not found downloads from given URL
 
 if(!file.exists("activity.zip")) {
@@ -37,19 +39,25 @@ my_activity$date <- as.Date(my_activity$date)
   
     
     
-```{r}
+
+```r
 my_q1tbl <- na.omit(my_activity)
 req_q1tbl <- my_q1tbl %>% group_by(date) %>% summarise(sum(steps))
 colnames(req_q1tbl) <- c("date", "TotalSteps")
 hist(req_q1tbl$TotalSteps, col = "Red", main = "Histogram of Total Number of Steps Taken Per Day", 
      xlab = "Number of Steps per Day")
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+```r
 orgstat <- summarise(req_q1tbl, mean = mean(TotalSteps), median = median(TotalSteps))
 orgMean <- prettyNum(orgstat$mean)
 orgMedian <- prettyNum(orgstat$median)
 ```
   
-#### The mean number of steps taken per day is `r orgMean`.    
-#### The median for number of steps taken per day is `r orgMedian`.   
+#### The mean number of steps taken per day is 10766.19.    
+#### The median for number of steps taken per day is 10765.   
   
   
   
@@ -60,18 +68,24 @@ orgMedian <- prettyNum(orgstat$median)
 #### The time-series graph below shows average number of steps taken during 5-minute intervals in a day.  
   
     
-```{r}
+
+```r
 req_q2tbl <- my_q1tbl %>% group_by(interval) %>% summarise(mean(steps))
 colnames(req_q2tbl) <- c("interval", "AvgSteps")
 plot(req_q2tbl$interval, req_q2tbl$AvgSteps, type = "l", col = "Blue", 
      main = "Average Daily Acitivity Pattern", 
      xlab = "Interval", ylab = " Average Number of Steps Taken")
+```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
+```r
 maxinterval <- filter(req_q2tbl, AvgSteps == max(AvgSteps))
 intMax <- maxinterval$interval
 ```
   
     
-#### On average across all days, the 5-minute interval that contains the maximum number of steps is `r intMax`.   
+#### On average across all days, the 5-minute interval that contains the maximum number of steps is 835.   
   
   
   
@@ -80,13 +94,14 @@ intMax <- maxinterval$interval
   
     
     
-```{r}
+
+```r
 missing <- sum(is.na(my_activity))
 ```
   
     
     
-#### The total number of rows with missing values is `r missing`.
+#### The total number of rows with missing values is 2304.
   
     
     
@@ -94,7 +109,8 @@ missing <- sum(is.na(my_activity))
   
     
     
-```{r}
+
+```r
 filldata <- cbind(req_q2tbl, my_activity)
 filldata$steps <- ifelse(is.na(filldata$steps), filldata$AvgSteps, filldata$steps)
 filldata <- filldata[, !duplicated(colnames(filldata))]
@@ -107,12 +123,18 @@ completedb <- select(filldata, interval, steps, date)
   
   
    
-```{r}
+
+```r
 req_q3tbl <- completedb %>% group_by(date) %>% summarise(sum(steps))
 colnames(req_q3tbl) <- c("date", "TotalSteps")
 hist(req_q3tbl$TotalSteps, col = "Red", 
      main = "Histogram of Total Number of Steps Taken Per Day", 
      xlab = "Number of Steps per Day")
+```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
+
+```r
 newstat <- summarise(req_q3tbl, mean = mean(TotalSteps), median = median(TotalSteps))
 newMean <- prettyNum(newstat$mean)
 newMedian <- prettyNum(newstat$median)
@@ -120,8 +142,8 @@ newMedian <- prettyNum(newstat$median)
   
     
     
-#### The mean number of steps taken is now `r newMean`.
-#### The median of number of steps is now `r newMedian`.
+#### The mean number of steps taken is now 10766.19.
+#### The median of number of steps is now 10766.19.
   
     
 #### As seen above, there is no change in the mean. However, median is now higher and equal to mean.
@@ -136,7 +158,8 @@ newMedian <- prettyNum(newstat$median)
   
   
   
-```{r}
+
+```r
 completedb <- mutate(completedb, day = weekdays(date))
 completedb <- mutate(completedb, daytype = ifelse(day == c("Saturday", "Sunday"), "weekend", "weekday"))
 completedb$daytype = as.factor(completedb$daytype)
@@ -146,6 +169,8 @@ p <- ggplot(weekdaysum, aes(x = interval, y = AvgSteps)) + geom_line(color = "bl
 a <- p + facet_wrap(~ daytype, nrow = 2, ncol = 1) + labs(x = "Interval", y = " Average Steps")
 print(a)
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
   
     
 #### As seen from the graph above, the activity pattern during the day remains more or less similar during weekdays & weekends. However, during the weekend the Average Steps taken are mostly higher for most of the 5-minute intervals.  
